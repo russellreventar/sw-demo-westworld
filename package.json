@@ -1,0 +1,40 @@
+{
+  "name": "sw-demo-westworld",
+  "version": "1.0.0",
+  "description": "Service Worker Demo - Westworld Mobile App",
+  "scripts": {
+    "build": "NODE_ENV=production webpack --watch --progress",
+    "server": "node server.js"
+  },
+  "author": "Russell Reventar",
+  "license": "MIT",
+  "homepage": "https://github.com/russellreventar/sw-demo-westworld",
+  "devDependencies": {
+    "babel-core": "^6.0.20",
+    "babel-eslint": "^4.1.3",
+    "babel-loader": "^6.0.1",
+    "babel-preset-es2015": "^6.0.15",
+    "babel-preset-react": "^6.0.15",
+    "babel-preset-stage-0": "^6.0.15",
+    "clean-webpack-plugin": "^0.1.15",
+    "css-loader": "^0.26.2",
+    "eslint": "^1.10.3",
+    "eslint-plugin-react": "^3.6.2",
+    "express": "^4.13.4",
+    "file-loader": "^0.10.0",
+    "react-hot-loader": "^1.3.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.2",
+    "webpack-dev-middleware": "^1.6.1",
+    "webpack-hot-middleware": "^2.10.0"
+  },
+  "dependencies": {
+    "accounting": "^0.4.1",
+    "axios": "^0.15.3",
+    "babel-preset-react": "^6.23.0",
+    "morgan": "^1.8.1",
+    "react": "^0.14.6",
+    "react-dom": "^0.14.6"
+  }
+}
