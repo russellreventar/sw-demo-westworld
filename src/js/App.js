@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Axios from 'axios';
 
-require('./style.css')
+require('./../css/style.css');
 
 class App extends React.Component {
 
@@ -40,13 +40,10 @@ class App extends React.Component {
           this.getBandits();
         })
     }else {
-      this.registerBackgroundSync(url, {method:'PUT'});
+      navigator.serviceWorker.controller.postMessage({type: 'sync', url, options: { method:'PUT'}})
     }
   }
 
-  registerBackgroundSync(url, options) {
-    navigator.serviceWorker.controller.postMessage({type: 'sync', url, options})
-  }
   enterApp() {
     this.setState({entered: true});
   }
@@ -56,6 +53,7 @@ class App extends React.Component {
   previous() {
     this.setState({currentBandit: this.state.currentBandit - 1})
   }
+
   render() {
     const { fetching, entered, bandits, currentBandit, currentTarget } = this.state;
     const bandit = bandits[currentBandit];
@@ -64,8 +62,8 @@ class App extends React.Component {
       <div className="app">
         {(fetching || !entered) ?
           <div className="loading">
-            <img className="logo" src={'/images/logo.png'}/>
-            { fetching ? <img className="spinner" src={'/images/spinner.png'}/> : null }
+            <img className="logo" src={'./src/imgs/logo.png'}/>
+            { fetching ? <img className="spinner" src={'./src/imgs/spinner.png'}/> : null }
             <h4>
               {
                 fetching ? "Loading Wanted List"
@@ -76,14 +74,14 @@ class App extends React.Component {
           </div> :
           bandits.length > 0 ?
             <div className="wanted">
-              <img onClick={this.getBandits.bind(this)} className="logo-small" src={'/images/logo.png'}/>
+              <img onClick={this.getBandits.bind(this)} className="logo-small" src={'./src/imgs/logo.png'}/>
               <h1> MOST WANTED </h1>
               <div className="bandit">
                 <div className="poster">
                   {bandit.captured ? <div className="captured">CAPTURED</div> : null}
                   <img src={ bandit.poster }/>
                 </div>
-                <h2>{bandit.name}</h2>
+                <h2>{bandit.firstName} <span className="nickname"> "{bandit.nickName}"</span> {bandit.lastName}</h2>
                 <p>{bandit.description}</p>
                 <div className="seperator"></div>
                 <div className="reward">
@@ -96,13 +94,12 @@ class App extends React.Component {
               </div>
               <div>
                 {
-                  currentBandit > 0 ? <button className="previous" onClick={()=>this.previous()}>{'<'}</button> : null
+                  currentBandit > 0 ?
+                    <button className="previous" onClick={()=>this.previous()}>{'<'}</button> : null
                 }
                 <div className="mark-as">
                   <a onClick={() => this.putBanditStatus(bandit.id, !bandit.captured)}>
-                    {
-                      bandit.captured ? 'Mark As Escaped' :'Mark As Captured'
-                    }
+                    {bandit.captured ? 'Mark As Escaped' :'Mark As Captured'}
                   </a>
                 </div>
                 {

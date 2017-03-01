@@ -1,15 +1,12 @@
 var path = require('path');
 var webpack = require('webpack');
 var express = require('express');
-var config = require('./webpack.config');
 var morgan = require('morgan');
 var app = express();
-var compiler = webpack(config);
 var fs = require('fs');
 
-app.use(require('webpack-hot-middleware')(compiler));
 app.use(morgan('dev'));
-app.use(express.static('dist'))
+app.use(express.static('./dist'))
 app.use(express.static(__dirname))
 
 app.get('/bandits', function(req, res) {
@@ -45,7 +42,7 @@ app.put('/escaped/:banditId', function(req, res) {
   })
 })
 
-app.listen(3000, function(err) {
+app.listen(8000, function(err) {
   if (err) { return console.error(err); }
-  console.log('Listening at http://localhost:3000/');
+  console.log('Listening at http://localhost:8000/');
 })

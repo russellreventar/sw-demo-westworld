@@ -2,7 +2,7 @@
   "name": "Westworld Bandits Application - Service Worker",
   "short_name": "Westworld",
   "icons": [{
-    "src": "images/android-chrome-192x192.png",
+    "src": "src/imgs/android-chrome-192x192.png",
     "sizes": "192x192",
     "type": "image/png"
   }],

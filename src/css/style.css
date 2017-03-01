@@ -6,7 +6,7 @@ html, body {
   font-family: "Helvetica Neue";
 }
 body {
-  background: url('/images/bg.png') no-repeat;
+  background: url('/src/imgs/bg.png') no-repeat;
   background-size: 100% 100%;
   color: white;
 }
@@ -37,7 +37,7 @@ h2 {
   text-transform: uppercase;
   font-weight: 300;
   letter-spacing: 4px;
-  margin: 10px 0;
+  margin: 5px 0;
   font-size: 17px;
 }
 
@@ -54,6 +54,19 @@ h4 {
   letter-spacing: 3px;
   text-transform: uppercase;
   text-align: center;
+}
+
+h5 {
+  margin: 0px;
+}
+
+.nickname{
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-align: center;
+  font-style: italic;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 .reward {
@@ -73,7 +86,7 @@ h4 {
 .app {
 }
 .wanted {
-  padding: 0px 30px;
+  padding: 0px 20px;
 }
 
 .poster {
