@@ -6,6 +6,7 @@
     <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/src/imgs/favicon.png">
     <!-- chrome 54+ -->
     <!-- <link rel="serviceworker" href="./src/js/myServiceWorker.js" scope="./">  -->
   </head>
@@ -14,8 +15,24 @@
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register('./serviceWorker.js', { scope: "./" })
-        .then(function(registration) {
-          console.info('Service Worker registered!');
+        .then(function(swRegistration) {
+          var serviceWorker;
+          if(swRegistration.installing){
+              console.log('📍 SW Registration: Installing');
+              serviceWorker = swRegistration.installing;
+          }else if(swRegistration.waiting){
+              console.log('📍 SW Registration: Installed/Waiting');
+              serviceWorker = swRegistration.waiting;
+          }else if(swRegistration.active){
+              console.log('📍 SW Registration: Activated');
+              serviceWorker = swRegistration.active;
+          }
+
+          // if(serviceWorker){
+          //     serviceWorker.addEventListener('statechange', function(e){
+          //         console.log(e.target.state);
+          //     });
+          // }
         })
         .catch(function(error) {
           console.error('Service worker failed ', error);

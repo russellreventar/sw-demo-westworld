@@ -1,86 +1,98 @@
-//Cache polyfil to support cacheAPI in all browsers
+const version = 'v.11';
+
+// ===========================================================
+//   DEMO 1 - Log Functional Events
+// ===========================================================
+// self.addEventListener('install', event => {
+//   console.info('⚡️ SW-%s: Installed', version);
+// })
+//
+// self.addEventListener('activate', event => {
+//   console.info('⚡️ SW-%s: Active', version);
+// })
+
+// ===========================================================
+//   DEMO 1 - Log Functional Events
+// ===========================================================
 importScripts('./src/js/lib/cache-polyfill.js');
-
-const version = 'v2';
-const cacheName = 'cache-v2';
-
+const cacheName = 'cache-v3';
 const filesToCache = [
   './',
   './index.html',
   './src/css/style.css',
   './dist/app.min.js',
   './manifest.json',
-  './src/imgs/favicon/android-chrome-192x192.png',
+  './src/imgs/favicon.png',
   './src/imgs/bg.png',
   './src/imgs/logo.png',
-  './src/imgs/spinner.png'
+  './src/imgs/spinner.png',
+  './bandits'
 ];
 
-
-//Adding `install` event listener
-self.addEventListener('install', event => {
-  console.info('SW-%s: ⚡️ Installed ', version);
-  // self.skipWaiting();
-  event.waitUntil(
+self.addEventListener('install', e => {
+  console.info('⚡️ SW-%s: Installed & Cached', version);
+  self.skipWaiting();
+  e.waitUntil(
     caches.open(cacheName).then(cache => {
       return cache.addAll(filesToCache)
-        .then(() => console.info('All files are cached'))
-    })
-  );
-});
-
-self.addEventListener('activate', event => {
-  console.info('SW-%s: ⚡️ Activated ', version);
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(keys.map(cache => {
-          if (cache !== cacheName) {
-            console.log('Cache deleted: ', cache);
-            return caches.delete(cache);
-          }
-        })
-      );
+        .then(()=>console.log('All Files Cached'))
     })
   );
 })
 
-//Adding `fetch` event listener
-self.addEventListener('fetch', (event) => {
-  var req = event.request;
-  console.log('SW-%s: ⚡️ Fetch ', version, req.url);
+self.addEventListener('activate', e => {
+  console.info('⚡️ SW-%s: Active', version);
+    e.waitUntil(
+      caches.keys().then(keys => {
+        return Promise.all(keys.map(cache => {
+            if (cache !== cacheName) {
+              return caches.delete(cache);
+            }
+          })
+        );
+      })
+    );
+})
 
-  event.respondWith(
-    //If request is already in cache, return it
+// ===========================================================
+//   DEMO 3 - Fetch
+// ===========================================================
+self.addEventListener('fetch', e => {
+  var req = e.request;
+  console.info('SW-%s: ⚡️ Fetch ', version, req.url);
+  e.respondWith(
     caches.match(req).then(res => {
 
-      if(req.method === 'PUT') {
-        return fetch(req);
-      }
+      if(req.method === 'PUT') return fetch(req);
 
       if(!navigator.onLine) {
         if(res) return res;
-      }else {
+      }else{
         return fetchAndCache(req);
       }
     })
   );
 });
 
+// ===========================================================
+//   DEMO 3 - Sync
+// ===========================================================
 const syncStore = {};
-self.addEventListener('sync', event => {
-  console.info('SW-%s: ⚡️ Sync ', version, syncStore[event.tag]);
-  const {url, options} = syncStore[event.tag];
-  event.waitUntil(fetch(url, options));
-})
 
-self.addEventListener('message', event => {
-  console.info('SW-%s: ⚡️ Message ', version, event.data);
-  if(event.data.type === 'sync') {
-     const id = uuid();
-     syncStore[id] = event.data
-     self.registration.sync.register(id);
-   }
+self.addEventListener('sync', e => {
+  console.info('SW-%s: ⚡️ Sync ', version, e.tag]);
+  const {url, options} = syncStore[e.tag];
+  e.waitUntil(fetch(url, options));
 })
+//
+// self.addEventListener('message', event => {
+//   console.info('SW-%s: ⚡️ Message ', version, event.data);
+//   if(event.data.type === 'sync') {
+//      const id = uuid();
+//      syncStore[id] = event.data
+//      self.registration.sync.register(id);
+//    }
+// })
 
 // -----------------------------------------------------------------
 // Helper Functions
