@@ -1,6 +1,6 @@
 importScripts('./src/js/lib/cache-polyfill.js');
-const version = 'v3';
-const cacheName = 'cache-v2';
+const version = 'v1';
+const cacheName = 'cache-v1';
 const cacheFiles = [
   './',
   './index.html',
@@ -16,31 +16,6 @@ const cacheFiles = [
 
 // PART 2 - Handle Install & Activate Events
 // ===========================================================
-// self.addEventListener('install', e => {
-//   console.info('⚡️ SW-%s: Installed', version);
-//   self.skipWaiting();
-//   e.waitUntil(
-//     caches.open(cacheName).then(cache => {
-//       return cache.addAll(cacheFiles)
-//         .then(()=>console.log('Cache added: ', cacheName))
-//     })
-//   );
-// })
-//
-// self.addEventListener('activate', e => {
-//   console.info('⚡️ SW-%s: Active', version);
-//   e.waitUntil(
-//     caches.keys().then(keys => {
-//       return Promise.all(keys.map(cache => {
-//         if (cache !== cacheName) {
-//           console.log('Cache deleted: ', cache);
-//           return caches.delete(cache);
-//         }
-//       }));
-//     })
-//   );
-// })
-
 self.addEventListener('install', e => {
   self.skipWaiting();
   logEvent('Install');
@@ -51,7 +26,6 @@ self.addEventListener('install', e => {
     })
   )
 })
-
 self.addEventListener('activate', e => {
   logEvent('Active');
   e.waitUntil(
@@ -68,22 +42,6 @@ self.addEventListener('activate', e => {
 
 // PART 3 - Fetch
 // ===========================================================
-// self.addEventListener('fetch', e => {
-//   var req = e.request;
-//   console.info('⚡️ SW-%s: Fetch ', version, req.url);
-//   e.respondWith(
-//     caches.match(req).then(res => {
-//
-//       if(req.method === 'PUT') return fetch(req);
-//
-//       if(offline()) {
-//         if(res) return res;
-//       }else{
-//         return fetchAndCache(req);
-//       }
-//     })
-//   );
-// });
 self.addEventListener('fetch', e => {
   var req = e.request;
   logEvent('Fetch', req.url);
@@ -100,26 +58,6 @@ self.addEventListener('fetch', e => {
 
 // PART 4 - Listens for messages from App.js
 // ===========================================================
-// 'tagId': {
-//   url: '/bandits',
-//   options: {
-//     method: 'GET'
-//   }
-// }
-// const syncStore = {};
-// self.addEventListener('message', e => {
-//   console.info('⚡️ SW-%s: Message ', version, e.data);
-//   var tag = uuid();
-//   syncStore[tag] = e.data;
-//   syncStore[tag].port = e.ports[0];
-//   self.registration.sync.register(tag);
-// })
-// 'tagId': {
-//   url: '/bandits',
-//   options: {
-//     method: 'GET'
-//   }
-// }
 const syncStore = {};
 self.addEventListener('message', e => {
   logEvent('Message', e.data)
@@ -131,13 +69,6 @@ self.addEventListener('message', e => {
 
 // PART 5 - Background Sync when online
 // ===========================================================
-// self.addEventListener('sync', e => {
-//   console.info('⚡️ SW-%s: Sync ', version, syncStore[e.tag]);
-//   const {url, options, port} = syncStore[e.tag];
-//   e.waitUntil(
-//     fetch(url, options).then(res => port.postMessage('Sync done!'))
-//   );
-// })
 self.addEventListener('sync', e => {
   logEvent('Sync', syncStore[e.tag])
   const {url, options, port} = syncStore[e.tag];
