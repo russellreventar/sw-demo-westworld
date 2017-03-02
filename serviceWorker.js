@@ -1,6 +1,6 @@
 importScripts('./src/js/lib/cache-polyfill.js');
-const version = 'v1';
-const cacheName = 'cache-v1';
+const version = 'v3';
+const cacheName = 'cache-v2';
 const cacheFiles = [
   './',
   './index.html',
@@ -41,6 +41,31 @@ const cacheFiles = [
 //   );
 // })
 
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  logEvent('Install');
+  e.waitUntil(
+    caches.open(cacheName).then(cache => {
+      return cache.addAll(cacheFiles)
+        .then(() => console.log('Cache added: ', cacheName))
+    })
+  )
+})
+
+self.addEventListener('activate', e => {
+  logEvent('Active');
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys.map(cache => {
+        if (cache !== cacheName) {
+          console.log('Cache deleted: ', cache);
+          return caches.delete(cache);
+        }
+      }));
+    })
+  );
+})
+
 // PART 3 - Fetch
 // ===========================================================
 // self.addEventListener('fetch', e => {
@@ -59,7 +84,19 @@ const cacheFiles = [
 //     })
 //   );
 // });
-self.addEventListener('fetch', e => {});
+self.addEventListener('fetch', e => {
+  var req = e.request;
+  logEvent('Fetch', req.url);
+  e.respondWith(
+    caches.match(req).then(res => {
+      if(offline()) {
+        if(res) return res
+      }else{
+        return fetchAndCache(req)
+      }
+    })
+  )
+});
 
 // PART 4 - Listens for messages from App.js
 // ===========================================================
@@ -77,7 +114,20 @@ self.addEventListener('fetch', e => {});
 //   syncStore[tag].port = e.ports[0];
 //   self.registration.sync.register(tag);
 // })
-self.addEventListener('message', e => {})
+// 'tagId': {
+//   url: '/bandits',
+//   options: {
+//     method: 'GET'
+//   }
+// }
+const syncStore = {};
+self.addEventListener('message', e => {
+  logEvent('Message', e.data)
+  var tag = uuid();
+  syncStore[tag] = e.data;
+  syncStore[tag].port = e.ports[0];
+  self.registration.sync.register(tag);
+})
 
 // PART 5 - Background Sync when online
 // ===========================================================
@@ -88,20 +138,27 @@ self.addEventListener('message', e => {})
 //     fetch(url, options).then(res => port.postMessage('Sync done!'))
 //   );
 // })
-self.addEventListener('sync', e => {});
+self.addEventListener('sync', e => {
+  logEvent('Sync', syncStore[e.tag])
+  const {url, options, port} = syncStore[e.tag];
+  e.waitUntil(
+    fetch(url, options).then(res => port.postMessage('NSYNC!'))
+  )
+});
 
 // Helper Functions
 // -----------------------------------------------------------------
 function fetchAndCache(req) {
-  return fetch(req).then(res => {
+  return fetch(req).then(res=>{
     if(res) {
-      return caches.open(cacheName)
-        .then(cache => {
+      return caches.open(cacheName).then(cache=>{
+        if(req.method !== 'PUT'){
           return cache.put(req, res.clone())
-        })
-        .then(() => {
+            .then(() => res)
+        }else{
           return res;
-        });
+        }
+      })
     }
   })
 }
@@ -117,4 +174,8 @@ function uuid() {
 
 function offline(){
   return !navigator.onLine;
+}
+
+function logEvent(eventName, log) {
+  console.info(`⚡️ SW-${version}: ${eventName} `, log ? log : '');
 }
