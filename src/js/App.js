@@ -23,24 +23,29 @@ class App extends React.Component {
 
   getBandits() {
     this.setState({fetching: true});
-    Axios.get('/bandits')
-      .then(res => {
-        this.setState({bandits: res.data, fetching: false});
-      })
+    Axios.get('/bandits').then(res => {
+      this.setState({bandits: res.data, fetching: false});
+    })
   }
 
   putBanditStatus(id, isCaptured) {
 
     const url = `/status/${id}?isCaptured=${isCaptured}`;
+    // Axios.put(url).then(() => this.getBandits());
 
+    // PART 4.b - Send message to Service Worker
+    // ===========================================================
+    // navigator.serviceWorker.controller.postMessage('Hello! from App.js');
+
+    // PART 5.b - Registar BG Sync if offline
+    // ===========================================================
     if(navigator.onLine) {
-      this.setState({fetching: true});
-      Axios.put(url)
-        .then(res => {
-          this.getBandits();
-        })
-    }else {
-      navigator.serviceWorker.controller.postMessage({type: 'sync', url, options: { method:'PUT'}})
+      Axios.put(url).then(() => this.getBandits());
+    }else{
+      navigator.serviceWorker.controller.postMessage({
+        url,
+        options: { method: 'PUT' }
+      });
     }
   }
 

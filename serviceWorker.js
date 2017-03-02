@@ -1,7 +1,6 @@
 const version = 'v.11';
 
-// ===========================================================
-//   DEMO 1 - Log Functional Events
+// PART 1 - Log Functional Events
 // ===========================================================
 // self.addEventListener('install', event => {
 //   console.info('⚡️ SW-%s: Installed', version);
@@ -11,8 +10,8 @@ const version = 'v.11';
 //   console.info('⚡️ SW-%s: Active', version);
 // })
 
-// ===========================================================
-//   DEMO 1 - Log Functional Events
+
+// PART 2 - Initial Cache
 // ===========================================================
 importScripts('./src/js/lib/cache-polyfill.js');
 const cacheName = 'cache-v3';
@@ -42,24 +41,23 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   console.info('⚡️ SW-%s: Active', version);
-    e.waitUntil(
-      caches.keys().then(keys => {
-        return Promise.all(keys.map(cache => {
-            if (cache !== cacheName) {
-              return caches.delete(cache);
-            }
-          })
-        );
-      })
-    );
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys.map(cache => {
+          if (cache !== cacheName) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
 })
 
-// ===========================================================
-//   DEMO 3 - Fetch
+// PART 3 - Fetch
 // ===========================================================
 self.addEventListener('fetch', e => {
   var req = e.request;
-  console.info('SW-%s: ⚡️ Fetch ', version, req.url);
+  console.info('⚡️ SW-%s: Fetch ', version, req.url);
   e.respondWith(
     caches.match(req).then(res => {
 
@@ -74,30 +72,33 @@ self.addEventListener('fetch', e => {
   );
 });
 
+// PART 4 - Recieve message from App.js
 // ===========================================================
-//   DEMO 3 - Sync
-// ===========================================================
-const syncStore = {};
+const syncStore = {
+  'tagId': {
+    url: '/bandits',
+    options: {
+      method: 'GET'
+    }
+  }
+};
+self.addEventListener('message', e => {
+  console.info('⚡️ SW-%s: Message ', version, e.data);
+  var tag = uuid();
+  syncStore[tag] = e.data;
+  self.registration.sync.register(tag);
+})
 
+// PART 5 - Background Sync
+// ===========================================================
 self.addEventListener('sync', e => {
-  console.info('SW-%s: ⚡️ Sync ', version, e.tag]);
+  console.info('⚡️ SW-%s: Sync ', version, syncStore[e.tag]);
   const {url, options} = syncStore[e.tag];
   e.waitUntil(fetch(url, options));
 })
-//
-// self.addEventListener('message', event => {
-//   console.info('SW-%s: ⚡️ Message ', version, event.data);
-//   if(event.data.type === 'sync') {
-//      const id = uuid();
-//      syncStore[id] = event.data
-//      self.registration.sync.register(id);
-//    }
-// })
 
-// -----------------------------------------------------------------
 // Helper Functions
 // -----------------------------------------------------------------
-
 function fetchAndCache(req) {
   return fetch(req).then(res => {
     if(res) {
@@ -111,7 +112,6 @@ function fetchAndCache(req) {
     }
   })
 }
-
 
 function uuid() {
   function s4() {

@@ -28,19 +28,7 @@ app.put('/status/:banditId', function(req, res) {
       res.sendStatus(200);
     })
   })
-})
-
-app.put('/escaped/:banditId', function(req, res) {
-  fs.readFile('data/bandits.json', function(err,data) {
-    var bandits = JSON.parse(data);
-    var banditIndex = bandits.findIndex(x => x.id == req.params.banditId);
-    bandits[banditIndex].captured = false;
-    fs.writeFile('data/bandits.json', JSON.stringify(bandits, null, '\t'), function(err) {
-      res.setHeader('Content-Type', 'application/json');
-      res.send(bandits);
-    })
-  })
-})
+});
 
 app.listen(8000, function(err) {
   if (err) { return console.error(err); }

@@ -18,7 +18,7 @@ a {
 
 p {
   letter-spacing: 1px;
-  font-size: 13px;
+  font-size: 14px;
 }
 #root, .app, .wanted {
   height: 100%;
@@ -133,7 +133,7 @@ h5 {
 }
 
 .bandit {
-  height: 490px;
+  height: 460px;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #C1C1C1;
   padding: 15px;
