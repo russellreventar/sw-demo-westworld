@@ -14,29 +14,29 @@
     <script type="text/javascript">
       // PART 1 - Register Service Worker
       // ===========================================================
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register('./serviceWorker.js')
-          .then(reg => {
-            var serviceWorker;
-            if(reg.installing){
-              console.info('📍 SW Registration: Installing');
-              serviceWorker = reg.installing;
-            }else if(reg.waiting){
-              console.info('📍 SW Registration: Waiting');
-              serviceWorker = reg.waiting;
-            }else if(reg.active){
-              console.info('📍 SW Registration: Active');
-              serviceWorker = reg.active;
-            }
-
-            if(serviceWorker){
-              serviceWorker.addEventListener('statechange', e => console.log('state change', e.target.state));
-            }
-          })
-          .catch(function(error) {
-            console.error('Service worker failed ', error);
-          });
-      }
+      // if ("serviceWorker" in navigator) {
+      //   navigator.serviceWorker.register('./serviceWorker.js')
+      //     .then(reg => {
+      //       var serviceWorker;
+      //       if(reg.installing){
+      //         console.info('📍 SW Registration: Installing');
+      //         serviceWorker = reg.installing;
+      //       }else if(reg.waiting){
+      //         console.info('📍 SW Registration: Waiting');
+      //         serviceWorker = reg.waiting;
+      //       }else if(reg.active){
+      //         console.info('📍 SW Registration: Active');
+      //         serviceWorker = reg.active;
+      //       }
+      //
+      //       if(serviceWorker){
+      //         serviceWorker.addEventListener('statechange', e => console.log('state change', e.target.state));
+      //       }
+      //     })
+      //     .catch(function(error) {
+      //       console.error('Service worker failed ', error);
+      //     });
+      // }
 
     </script>
     <div id='app'></div>

@@ -33,7 +33,7 @@ class App extends React.Component {
 
     const url = `/status/${id}?isCaptured=${isCaptured}`;
     const options = {method: 'PUT'};
-    // Axios(url, options).then(() => this.getBandits());
+    Axios(url, options).then(() => this.getBandits());
 
     // PART 4.b - Send message to Service Worker
     // ===========================================================
@@ -41,14 +41,14 @@ class App extends React.Component {
 
     // PART 5.b - Registar BG Sync if offline
     // ===========================================================
-    if(navigator.onLine) {
-      Axios(url, options).then(() => this.getBandits());
-    }else{
-      this.sendMessageToSW({url, options}).then(res => {
-        console.log(res);
-        this.getBandits();
-      })
-    }
+    // if(navigator.onLine) {
+    //   Axios(url, options).then(() => this.getBandits());
+    // }else{
+    //   this.sendMessageToSW({url, options}).then(res => {
+    //     console.log(res);
+    //     this.getBandits();
+    //   })
+    // }
   }
 
   sendMessageToSW(data) {
