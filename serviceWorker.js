@@ -1,21 +1,7 @@
-const version = 'v.11';
-
-// PART 1 - Log Functional Events
-// ===========================================================
-// self.addEventListener('install', event => {
-//   console.info('⚡️ SW-%s: Installed', version);
-// })
-//
-// self.addEventListener('activate', event => {
-//   console.info('⚡️ SW-%s: Active', version);
-// })
-
-
-// PART 2 - Initial Cache
-// ===========================================================
 importScripts('./src/js/lib/cache-polyfill.js');
-const cacheName = 'cache-v3';
-const filesToCache = [
+const version = 'v1';
+const cacheName = 'cache-v1';
+const cacheFiles = [
   './',
   './index.html',
   './src/css/style.css',
@@ -28,13 +14,15 @@ const filesToCache = [
   './bandits'
 ];
 
+// PART 2 - Handle Install & Activate Events
+// ===========================================================
 self.addEventListener('install', e => {
-  console.info('⚡️ SW-%s: Installed & Cached', version);
+  console.info('⚡️ SW-%s: Installed', version);
   self.skipWaiting();
   e.waitUntil(
     caches.open(cacheName).then(cache => {
-      return cache.addAll(filesToCache)
-        .then(()=>console.log('All Files Cached'))
+      return cache.addAll(cacheFiles)
+        .then(()=>console.log('Cache added: ', cacheName))
     })
   );
 })
@@ -44,11 +32,11 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(keys.map(cache => {
-          if (cache !== cacheName) {
-            return caches.delete(cache);
-          }
-        })
-      );
+        if (cache !== cacheName) {
+          console.log('Cache deleted: ', cache);
+          return caches.delete(cache);
+        }
+      }));
     })
   );
 })
@@ -63,7 +51,7 @@ self.addEventListener('fetch', e => {
 
       if(req.method === 'PUT') return fetch(req);
 
-      if(!navigator.onLine) {
+      if(offline()) {
         if(res) return res;
       }else{
         return fetchAndCache(req);
@@ -72,29 +60,31 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// PART 4 - Recieve message from App.js
+// PART 4 - Listens for messages from App.js
 // ===========================================================
-const syncStore = {
-  'tagId': {
-    url: '/bandits',
-    options: {
-      method: 'GET'
-    }
-  }
-};
+// 'tagId': {
+//   url: '/bandits',
+//   options: {
+//     method: 'GET'
+//   }
+// }
+const syncStore = {};
 self.addEventListener('message', e => {
   console.info('⚡️ SW-%s: Message ', version, e.data);
   var tag = uuid();
   syncStore[tag] = e.data;
+  syncStore[tag].port = e.ports[0];
   self.registration.sync.register(tag);
 })
 
-// PART 5 - Background Sync
+// PART 5 - Background Sync when online
 // ===========================================================
 self.addEventListener('sync', e => {
   console.info('⚡️ SW-%s: Sync ', version, syncStore[e.tag]);
-  const {url, options} = syncStore[e.tag];
-  e.waitUntil(fetch(url, options));
+  const {url, options, port} = syncStore[e.tag];
+  e.waitUntil(
+    fetch(url, options).then(res => port.postMessage('Sync done!'))
+  );
 })
 
 // Helper Functions
@@ -120,4 +110,8 @@ function uuid() {
       .substring(1);
   }
   return s4() + s4();
+}
+
+function offline(){
+  return !navigator.onLine;
 }

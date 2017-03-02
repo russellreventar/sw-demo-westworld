@@ -13,7 +13,8 @@ class App extends React.Component {
       currentBandit: 0,
       currentTarget: null,
       entered: false,
-      bandits: []
+      bandits: [],
+      backgroundSync: false
     }
   }
 
@@ -31,22 +32,41 @@ class App extends React.Component {
   putBanditStatus(id, isCaptured) {
 
     const url = `/status/${id}?isCaptured=${isCaptured}`;
-    // Axios.put(url).then(() => this.getBandits());
+    const options = {method: 'PUT'};
+    // Axios.(url, options).then(() => this.getBandits());
 
     // PART 4.b - Send message to Service Worker
     // ===========================================================
-    // navigator.serviceWorker.controller.postMessage('Hello! from App.js');
+    // this.sendMessageToSW('Hello! from App.js');
 
     // PART 5.b - Registar BG Sync if offline
     // ===========================================================
     if(navigator.onLine) {
-      Axios.put(url).then(() => this.getBandits());
+      Axios(url, options).then(() => this.getBandits());
     }else{
-      navigator.serviceWorker.controller.postMessage({
-        url,
-        options: { method: 'PUT' }
-      });
+      this.setState({backgroundSync: true});
+      this.sendMessageToSW({url, options}).then(res => {
+
+        //message from SW
+        console.log(res);
+        this.getBandits()
+        this.setState({backgroundSync: false});
+      })
     }
+  }
+
+  sendMessageToSW(data) {
+    return new Promise((res, rej) => {
+      var messageChannel = new MessageChannel();
+      messageChannel.port1.onmessage = e => {
+        if (e.data.error) {
+          rej(e.data.error);
+        } else {
+          res(e.data);
+        }
+      };
+      navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
+    });
   }
 
   enterApp() {
@@ -65,6 +85,13 @@ class App extends React.Component {
 
     return (
       <div className="app">
+        {
+          !navigator.onLine ?
+            <div className="offline-banner">
+              { this.state.backgroundSync ? "We'll attempt your request when you have connection" : "You are offline." }
+            </div>
+          : null
+        }
         {(fetching || !entered) ?
           <div className="loading">
             <img className="logo" src={'./src/imgs/logo.png'}/>
